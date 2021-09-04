@@ -12,6 +12,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import java.util.*
+import javax.security.auth.login.LoginException
 
 class AddTaskActivity : AppCompatActivity() {
 
@@ -59,7 +60,7 @@ class AddTaskActivity : AppCompatActivity() {
                 hour = binding.tilHour.text
             )
             TaskDataSource.insertTask(task)
-            Log.e("TAG", "insertListeners: " + TaskDataSource.getList() )
+            finish()
         }
     }
 }
