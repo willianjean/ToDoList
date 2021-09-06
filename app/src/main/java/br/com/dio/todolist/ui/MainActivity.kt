@@ -1,9 +1,10 @@
 package br.com.dio.todolist.ui
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import br.com.dio.todolist.databinding.ActivityMainBinding
 import br.com.dio.todolist.datasource.TaskDataSource
 
@@ -17,34 +18,48 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
+        binding.rvTasks.adapter = adapter
+        updateList()
 
         insertListeners()
+        //DATA STORE
+        //ROOM
     }
 
     private fun insertListeners() {
-        binding.fab.setOnClickListener{
+        binding.fab.setOnClickListener {
             startActivityForResult(Intent(this, AddTaskActivity::class.java), CREATE_NEW_TASK)
         }
 
         adapter.listenerEdit = {
-            Log.e("TAG", "insertListeners: $it")
+            val intent = Intent(this, AddTaskActivity::class.java)
+            intent.putExtra(AddTaskActivity.TASK_ID, it.id)
+            startActivityForResult(intent, CREATE_NEW_TASK)
         }
 
         adapter.listenerDelete = {
-            Log.e("TAG", "insertListeners: $it")
+            TaskDataSource.deleteTask(it)
+            updateList()
         }
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == CREATE_NEW_TASK){
-            binding.rvTasks.adapter = adapter
-            adapter.submitList(TaskDataSource.getList())
-        }
+        if (requestCode == CREATE_NEW_TASK && resultCode == Activity.RESULT_OK) updateList()
     }
 
-    companion object{
+    private fun updateList() {
+        val list = TaskDataSource.getList()
+        binding.includeState.emptyState.visibility = if (list.isEmpty())
+            View.VISIBLE
+        else
+            View.GONE
+
+        adapter.submitList(list)
+    }
+
+    companion object {
         private const val CREATE_NEW_TASK = 1000
     }
 }
